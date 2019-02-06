@@ -4,7 +4,7 @@ import sys
 import random
 from pygame.locals import *
 
-from board import Board
+from board import Board, RightBoard
 from flags import F
 from controller import Controller
 from ui import StatusBar, GenUI
@@ -30,7 +30,8 @@ def eventkey_to_action(eventkey):
 # Starting the game components
 pygame.init()
 pygame.display.set_caption(F.game_name)
-board = Board()
+board_0 = Board()
+board_1 = RightBoard()
 status_bar = StatusBar()
 gen_ui = GenUI()
 DISPLAYSUR = pygame.display.set_mode((F.window_w, F.window_h))
@@ -75,9 +76,9 @@ while True:
 
     # starting the board
     elif controller.game_status == 5:
-        board = Board()
+        board_0 = Board()
         controller.game_status = 2
-        status_bar.board = board
+        status_bar.board = board_1
         status_bar.update_status()
         #status_bar.controller = controller
         continue
@@ -92,12 +93,23 @@ while True:
                 action = eventkey_to_action(event.key)
                 if action in ['up','down','right','left']:
                     sound_player.play_action_sound()
-                    if_moved = board.update_board(action)
+                    if_moved_0 = board_0.update_board(action)
+                    board_1.cancelled_list = board_0.cancelled
+                    if_moved_1 = board_1.update_board(action)
+                    print(board_0.cancelled)
+                    print(board_1.cancelled_list)
 
-                    if if_moved:
-                        print("board updated !!")
-                        print(board)
-                        mover = Mover(board.prev_board, action)
+                    Board.print_both_boards(board_0.board, board_1.board)
+
+                    if if_moved_0:
+                        #print(board_0)
+                        mover_0 = Mover(board_0.prev_board, action)
+                        controller.game_status = 21
+                        status_bar.update_status()
+
+                    if if_moved_1:
+                        #print(board_1)
+                        mover_1 = Mover(board_1.prev_board, action)
                         controller.game_status = 21
                         status_bar.update_status()
 
@@ -110,9 +122,9 @@ while True:
 
                 elif F.debug_mod:
                     if event.key == pygame.K_F4: # Four for Die (si3)
-                        board.if_gg = True
+                        board_0.if_gg = True
                     elif event.key == pygame.K_F5: # Five (V) for Victory
-                        board.if_win = True
+                        board_0.if_win = True
 
                 else:
                     print("Invalid key input: <" + str(event.key) +">; Doing nothing...")
@@ -120,11 +132,11 @@ while True:
                 pass
                 #print("other event.type: " + str(event.type))
 
-        if board.if_gg:
+        if board_0.if_gg:
             controller.lose_game()
-        elif board.if_win:
+        elif board_0.if_win:
             controller.win_game()
-            board.if_win = False
+            board_0.if_win = False
 
     else:
         pass
@@ -134,34 +146,64 @@ while True:
     # ===================================
 
     # render the board bg
-    pygame.draw.rect(DISPLAYSUR, F.board_frame_color, F.board_outer_rect)
+    pygame.draw.rect(DISPLAYSUR, F.board_frame_color, F.board_outer_rect_0)
     for row in range(F.map_cols):
         for col in range(F.map_rows):
             pygame.draw.rect(DISPLAYSUR, F.board_frame_color,
-                (col*F.tile_size+F.board_offset_x, row*F.tile_size+
-                    F.board_offset_y, F.tile_size, F.tile_size))
+                (col*F.tile_size+F.board_origin_0[0], row*F.tile_size+
+                    F.board_origin_0[1], F.tile_size, F.tile_size))
             pygame.draw.rect(DISPLAYSUR, F.board_color,(
-                col*F.tile_size+F.board_offset_x+F.board_frame_px,
-                row*F.tile_size+F.board_offset_y+F.board_frame_px, 
+                col*F.tile_size+F.board_origin_0[0]+F.board_frame_px,
+                row*F.tile_size+F.board_origin_0[1]+F.board_frame_px, 
+                F.tile_size-2*F.board_frame_px, 
+                F.tile_size-2*F.board_frame_px))
+
+    pygame.draw.rect(DISPLAYSUR, F.board_frame_color, F.board_outer_rect_1)
+    for row in range(F.map_cols):
+        for col in range(F.map_rows):
+            pygame.draw.rect(DISPLAYSUR, F.board_frame_color,
+                (col*F.tile_size+F.board_origin_1[0], row*F.tile_size+
+                    F.board_origin_1[1], F.tile_size, F.tile_size))
+            pygame.draw.rect(DISPLAYSUR, F.board_color,(
+                col*F.tile_size+F.board_origin_1[0]+F.board_frame_px,
+                row*F.tile_size+F.board_origin_1[1]+F.board_frame_px, 
                 F.tile_size-2*F.board_frame_px, 
                 F.tile_size-2*F.board_frame_px))
 
     # render the moving blocks
     if controller.game_status == 21:
-        if mover.remain_moving_frames > 0:
-            mover.move_all()
+        if mover_0.remain_moving_frames > 0:
+            mover_0.move_all()
             for row in range(F.map_rows):
-                for col in range(F.map_cols):                   
-                    if mover.blocks[row][col]:
+                for col in range(F.map_cols):
+                    if mover_0.blocks[row][col]:
                         # the tile background
-                        moving_tile_pos = (mover.blocks[row][col].y*F.tile_size+F.board_offset_x+F.board_frame_px,
-                            mover.blocks[row][col].x*F.tile_size+F.board_offset_y+F.board_frame_px)
+                        moving_tile_pos = (mover_0.blocks[row][col].y*F.tile_size+F.board_origin_0[0]+F.board_frame_px,
+                            mover_0.blocks[row][col].x*F.tile_size+F.board_origin_0[1]+F.board_frame_px)
                         moving_tile_rect = moving_tile_pos + (F.tile_size-2*F.board_frame_px, 
                             F.tile_size -2*F.board_frame_px)
-                        tile_color = F.tile_color[board.prev_board[row][col]]
+                        tile_color = F.tile_color[board_0.prev_board[row][col]]
                         pygame.draw.rect(DISPLAYSUR, tile_color, moving_tile_rect)
                         # the text (number)
-                        text_obj = gen_ui.generate_block_text_obj(GFONTS, board.prev_board[row][col])
+                        text_obj = gen_ui.generate_block_text_obj(GFONTS, board_0.prev_board[row][col])
+                        if F.block_font_center:
+                            moving_tile_pos = Mover.center_text(text_obj,moving_tile_pos)
+                        DISPLAYSUR.blit(text_obj,moving_tile_pos)
+
+        if mover_1.remain_moving_frames > 0:
+            mover_1.move_all()
+            for row in range(F.map_rows):
+                for col in range(F.map_cols):
+                    if mover_1.blocks[row][col]:
+                        # the tile background
+                        moving_tile_pos = (mover_1.blocks[row][col].y*F.tile_size+F.board_origin_1[0]+F.board_frame_px,
+                            mover_1.blocks[row][col].x*F.tile_size+F.board_origin_1[1]+F.board_frame_px)
+                        moving_tile_rect = moving_tile_pos + (F.tile_size-2*F.board_frame_px, 
+                            F.tile_size -2*F.board_frame_px)
+                        tile_color = F.tile_color[board_1.prev_board[row][col]]
+                        pygame.draw.rect(DISPLAYSUR, tile_color, moving_tile_rect)
+                        # the text (number)
+                        text_obj = gen_ui.generate_block_text_obj(GFONTS, board_1.prev_board[row][col])
                         if F.block_font_center:
                             moving_tile_pos = Mover.center_text(text_obj,moving_tile_pos)
                         DISPLAYSUR.blit(text_obj,moving_tile_pos)
@@ -172,21 +214,42 @@ while True:
     if controller.game_status != 21:
         for row in range(F.map_cols):
             for col in range(F.map_rows):
-                if board.board[row][col]:
-                    block_rect = (col*F.tile_size+F.board_offset_x+F.board_frame_px, 
-                        row*F.tile_size+F.board_offset_y+F.board_frame_px, 
+                if board_0.board[row][col]:
+                    block_rect = (col*F.tile_size+F.board_origin_0[0]+F.board_frame_px, 
+                        row*F.tile_size+F.board_origin_0[1]+F.board_frame_px, 
                         F.tile_size-F.board_frame_px*2,F.tile_size-F.board_frame_px*2)
-                    tile_color = F.tile_color[board.board[row][col]]
+                    tile_color = F.tile_color[board_0.board[row][col]]
+                    pygame.draw.rect(DISPLAYSUR, tile_color, block_rect)
+    
+    if controller.game_status != 21:
+        for row in range(F.map_cols):
+            for col in range(F.map_rows):
+                if board_1.board[row][col]:
+                    block_rect = (col*F.tile_size+F.board_origin_1[0]+F.board_frame_px, 
+                        row*F.tile_size+F.board_origin_1[1]+F.board_frame_px, 
+                        F.tile_size-F.board_frame_px*2,F.tile_size-F.board_frame_px*2)
+                    tile_color = F.tile_color[board_1.board[row][col]]
                     pygame.draw.rect(DISPLAYSUR, tile_color, block_rect)
 
     # render the text
     if controller.game_status != 21:
         for row in range(F.map_cols):
             for col in range(F.map_rows):
-                if board.board[row][col]:
-                    text_obj = gen_ui.generate_block_text_obj(FONTS=GFONTS, n=board.board[row][col])
-                    tile_pos = (col*F.tile_size+F.board_offset_x+F.board_frame_px, 
-                        row*F.tile_size+F.board_offset_y+F.board_frame_px)
+                if board_0.board[row][col]:
+                    text_obj = gen_ui.generate_block_text_obj(FONTS=GFONTS, n=board_0.board[row][col])
+                    tile_pos = (col*F.tile_size+F.board_origin_0[0]+F.board_frame_px, 
+                        row*F.tile_size+F.board_origin_0[1]+F.board_frame_px)
+                    if F.block_font_center:
+                        tile_pos = Mover.center_text(text_obj, tile_pos)
+                    DISPLAYSUR.blit(text_obj, tile_pos)
+
+    if controller.game_status != 21:
+        for row in range(F.map_cols):
+            for col in range(F.map_rows):
+                if board_1.board[row][col]:
+                    text_obj = gen_ui.generate_block_text_obj(FONTS=GFONTS, n=board_1.board[row][col])
+                    tile_pos = (col*F.tile_size+F.board_origin_1[0]+F.board_frame_px, 
+                        row*F.tile_size+F.board_origin_1[1]+F.board_frame_px)
                     if F.block_font_center:
                         tile_pos = Mover.center_text(text_obj, tile_pos)
                     DISPLAYSUR.blit(text_obj, tile_pos)
@@ -204,9 +267,9 @@ while True:
     # part 3. play sound effect
     # ===================================
 
-    sound_event_monitor = (board.if_moved, board.if_merged, board.if_upgraded)
+    sound_event_monitor = (board_0.if_moved, board_0.if_merged, board_0.if_upgraded)
     sound_player.play_sound_effect(sound_event_monitor, controller.game_status)
-    board.resest_event_monitor()
+    board_0.resest_event_monitor()
 
 
     # ===================================

@@ -25,6 +25,9 @@ class Board(object):
         self.if_merged = False
         self.if_upgraded = False
 
+        # pass to the right_board (board_1)
+        self.cancelled = []
+
         self.init_board()
         print("init board:")
         print(self)
@@ -68,7 +71,7 @@ class Board(object):
         self.prev_action = action
         self.prev_board = self.board
         self.board = new_board
-        #print("before spawn "+str(self))
+         # print("before spawn "+str(self))
         self.spawn_block()
 
         # 5. check GG condition
@@ -199,10 +202,15 @@ class Board(object):
 
     #@staticmethod
     def merge_block(self, b, from_pos, to_pos):
+        temp_v = b[to_pos[0]][to_pos[1]]
         b[to_pos[0]][to_pos[1]] += b[from_pos[0]][from_pos[1]]
         b[from_pos[0]][from_pos[1]] = 0
         self.if_merged = True
-        return 1
+        if b[to_pos[0]][to_pos[1]] == 0:
+            self.cancelled.append(abs(temp_v))
+            return 2
+        else:
+            return 1
 
     def add_to_board(self, pos, obj_type):
         self.board[pos[0]][pos[1]] = obj_type
@@ -252,3 +260,55 @@ class Board(object):
         self.if_moved = False
         self.if_merged = False
         self.if_upgraded = False
+        self.cancelled = []
+
+    @staticmethod
+    def print_both_boards(b1, b2):
+        n = len(b1)
+        for i in range(n):
+            r1 = [str(e).rjust(4) for e in b1[i]]
+            r2 = [str(e).rjust(4) for e in b2[i]]
+            r1 = "[" + "".join(r1) + "]"
+            r2 = "[" + "".join(r2) + "]"
+            print(r1, end="")
+            print("\t", end="")
+            print(r2)
+
+
+class RightBoard(Board):
+    """docstring for NewBoard"""
+    def __init__(self):
+        super(RightBoard, self).__init__()
+        self.is_empty = True
+
+    def spawn_block(self):
+        print("xx")
+        for b in self.cancelled_list:
+            print("spawning b....")
+            self.spawn_one_block(b)
+
+    def spawn_one_block(self, spawn_type=1):
+        valid_pos_candidates = self.get_valid_spawn_pos()
+        #print(valid_pos_candidates)
+        if len(valid_pos_candidates):
+            self.if_need_to_check_gg = True
+        spawn_pos = random.choice(valid_pos_candidates)
+        self.add_to_board(spawn_pos, spawn_type)
+        self.is_empty = False
+        return 1        
+        
+    def init_board(self):
+        # initialize the map with all dirt
+        self.board = [[0 for w in range(F.map_rows)] 
+            for h in range (F.map_cols)]
+
+    def check_if_same_board(self, b1, b2):
+        # start: added this handle the exception at the start of the board.
+        if self.is_empty or len(self.cancelled_list) > 0:
+            return False
+        # end
+        for i in range(F.map_rows):
+            for j in range(F.map_cols):
+                if b1[i][j] != b2[i][j]:
+                    return False
+        return True

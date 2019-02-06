@@ -6,6 +6,7 @@ class Flags(object):
     """docstring for Flags"""
 
     def __init__(self):
+        # game general
         self.game_name = 'Banjiu 2048'
         self.game_ver = '0.0.1.apha.190203'
         self.proj_path = '/home/whoji/Desktop/ILC_2019/bw2048/'
@@ -30,15 +31,14 @@ class Flags(object):
         # size and pos conf (general and menu)
         self.window_w = 800
         self.window_h = 600
-        self.tile_size = 100
+        self.tile_size = 70
         self.map_rows = 4
         self.map_cols = 4
         self.status_bar_size = 60
-        self.board_offset_x, self.board_offset_y = self.__calculate_board_offset()
         self.text_offset_x = 10
         self.text_offset_y = 10
         self.text_offset = (10,10)
-        self.menu_rect = (self.board_offset_x+50, self.board_offset_y+50,
+        self.menu_rect = (100, 100,
             self.map_cols*self.tile_size-100, self.map_rows*self.tile_size-100)
         self.menu_size = 200
         self.center_x  = round(self.window_w / 2)
@@ -46,16 +46,24 @@ class Flags(object):
         self.blink_title = False
         self.blink_tile_fps = 20 # every 10 frames will change color
 
-        # size and pos conf (board)
+        # [Board] size and pos conf
         self.board_color = self.grey1
         self.board_frame_color = self.orange
         self.board_frame_px = 2
-        self.board_rect = (self.board_offset_x, self.board_offset_y,
-            self.map_cols*self.tile_size, self.map_rows*self.tile_size)
-        self.board_outer_rect = (self.board_offset_x-self.board_frame_px,
-            self.board_offset_y-self.board_frame_px, 
-            self.map_cols*self.tile_size+2*self.board_frame_px, 
-            self.map_rows*self.tile_size+2*self.board_frame_px)
+         #self.board_rect = (self.board_offset_x, self.board_offset_y,
+         #    self.map_cols*self.tile_size, self.map_rows*self.tile_size)
+         # self.board_offset_x, self.board_offset_y = self.__calculate_board_offset()
+        self.board_rect_0, self.board_rect_1 = self.__calculate_two_board_rect()
+        self.board_outer_rect_0 = (self.board_rect_0[0]-self.board_frame_px,
+            self.board_rect_0[1]-self.board_frame_px, 
+            self.board_rect_0[2]+2*self.board_frame_px, 
+            self.board_rect_0[3]+2*self.board_frame_px)
+        self.board_outer_rect_1 = (self.board_rect_1[0]-self.board_frame_px,
+            self.board_rect_1[1]-self.board_frame_px, 
+            self.board_rect_1[2]+2*self.board_frame_px,
+            self.board_rect_1[3]+2*self.board_frame_px)
+        self.board_origin_0 = self.board_rect_0[:2]
+        self.board_origin_1 = self.board_rect_1[:2]
         self.init_board_blocks = 2
         self.block_font_center = True
         self.block_font_size = int(self.tile_size / 2)
@@ -120,6 +128,15 @@ class Flags(object):
         offset_y = round((self.window_h - self.status_bar_size) / 2 - 
             self.map_rows * self.tile_size / 2)
         return offset_x, offset_y
+
+    def __calculate_two_board_rect(self):
+        offset_x0 = round(self.window_w / 4     - self.map_cols * self.tile_size / 2)
+        offset_x1 = round(self.window_w / 4 * 3 - self.map_cols * self.tile_size / 2)
+        offset_y0 = round((self.window_h - self.status_bar_size) / 2 - 
+            self.map_rows * self.tile_size / 2)
+        offset_y1 = offset_y0
+        l = self.map_cols * self.tile_size
+        return (offset_x0, offset_y0, l, l), (offset_x1, offset_y1, l, l)
 
     def __get_tile_colors(self):
         self.tile_color = {
