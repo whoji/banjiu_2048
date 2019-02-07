@@ -43,7 +43,7 @@ whoji (whoji@null.net)
 ### Screenshots
 
 Main menu: 
-![main menu](./asset/screenshot/screenshot_0.png "main menu")
+![](./asset/screenshot/screenshot_0.png "main menu" =350x)
 
 Game view: 
-![game view](./asset/screenshot/screenshot_1.png "game view")
+![](./asset/screenshot/screenshot_1.png "game view" =350x)
