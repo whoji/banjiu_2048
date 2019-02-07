@@ -224,7 +224,7 @@ class Board(object):
         if len(valid_pos_candidates):
             self.if_need_to_check_gg = True
         spawn_pos = random.choice(valid_pos_candidates)
-        spawn_type = random.choice([1,2,-1,-2])
+        spawn_type = random.choice(F.spawn_blocks)
         self.add_to_board(spawn_pos, spawn_type)
         return 1
 

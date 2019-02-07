@@ -1,0 +1,6 @@
+#*.png
+*.mov
+__*
+*~
+trophy.pkl
+

@@ -8,11 +8,12 @@ class Flags(object):
     def __init__(self):
         # game general
         self.game_name = 'Banjiu 2048'
-        self.game_ver = '0.0.1.apha.190203'
+        self.game_ver = '0.2.apha.190206'
         self.proj_path = '/home/whoji/Desktop/ILC_2019/bw2048/'
         self.save_path = './save/'
-        self.debug_mod = True
+        self.debug_mod = False
         self.game_fps = 60
+        self.spawn_blocks = [2,-2] #[1,2,-1,-2]
 
         # colors
         self.grey1 = (28,32,38)
