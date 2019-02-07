@@ -10,7 +10,6 @@ from controller import Controller
 from ui import StatusBar, GenUI
 from mover import Mover
 from sound import SoundPlayer
-from trophy import Trophy
 
 def eventkey_to_action(eventkey):
     action = None
@@ -35,9 +34,7 @@ board_1 = RightBoard()
 status_bar = StatusBar()
 gen_ui = GenUI()
 DISPLAYSUR = pygame.display.set_mode((F.window_w, F.window_h))
-#trophy = Trophy()
-trophy = None
-controller = Controller(DISPLAYSUR, trophy)
+controller = Controller(DISPLAYSUR)
 sound_player = SoundPlayer(pygame)
 clock = pygame.time.Clock()
 
@@ -77,6 +74,7 @@ while True:
     # starting the board
     elif controller.game_status == 5:
         board_0 = Board()
+        board_1 = RightBoard()
         controller.game_status = 2
         status_bar.board = board_1
         status_bar.update_status()
@@ -113,6 +111,21 @@ while True:
                         controller.game_status = 21
                         status_bar.update_status()
 
+                    # if if_moved_0 or if_moved_1:
+                    #     if if_moved_0:
+                    #         mover_0 = Mover(board_0.prev_board, action)
+                    #     else:
+                    #         mover_0 = Mover(board_0.board, action)
+
+                    #     if if_moved_1:
+                    #         mover_1 = Mover(board_1.prev_board, action)
+                    #     else:
+                    #         mover_1 = Mover(board_1.board, action)
+
+                    #     controller.game_status = 21
+                    #     status_bar.update_status()
+
+
                 # can press q to exit the game only in debug_mode
                 elif event.unicode == 'q' and F.debug_mod:
                     controller.quit_game()
@@ -123,8 +136,9 @@ while True:
                 elif F.debug_mod:
                     if event.key == pygame.K_F4: # Four for Die (si3)
                         board_0.if_gg = True
+                        board_1.if_gg = True
                     elif event.key == pygame.K_F5: # Five (V) for Victory
-                        board_0.if_win = True
+                        board_1.if_win = True
 
                 else:
                     print("Invalid key input: <" + str(event.key) +">; Doing nothing...")
@@ -132,11 +146,11 @@ while True:
                 pass
                 #print("other event.type: " + str(event.type))
 
-        if board_0.if_gg:
+        if board_0.if_gg or board_1.if_gg:
             controller.lose_game()
-        elif board_0.if_win:
+        elif board_1.if_win:
             controller.win_game()
-            board_0.if_win = False
+            board_1.if_win = False
 
     else:
         pass
@@ -172,7 +186,7 @@ while True:
 
     # render the moving blocks
     if controller.game_status == 21:
-        if mover_0.remain_moving_frames > 0:
+        if mover_0.remain_moving_frames > 0 and if_moved_0:
             mover_0.move_all()
             for row in range(F.map_rows):
                 for col in range(F.map_cols):
@@ -190,7 +204,7 @@ while True:
                             moving_tile_pos = Mover.center_text(text_obj,moving_tile_pos)
                         DISPLAYSUR.blit(text_obj,moving_tile_pos)
 
-        if mover_1.remain_moving_frames > 0:
+        if mover_1.remain_moving_frames > 0 and if_moved_1:
             mover_1.move_all()
             for row in range(F.map_rows):
                 for col in range(F.map_cols):
@@ -200,7 +214,7 @@ while True:
                             mover_1.blocks[row][col].x*F.tile_size+F.board_origin_1[1]+F.board_frame_px)
                         moving_tile_rect = moving_tile_pos + (F.tile_size-2*F.board_frame_px, 
                             F.tile_size -2*F.board_frame_px)
-                        tile_color = F.tile_color[board_1.prev_board[row][col]]
+                        tile_color = F.tile_color_1[board_1.prev_board[row][col]]
                         pygame.draw.rect(DISPLAYSUR, tile_color, moving_tile_rect)
                         # the text (number)
                         text_obj = gen_ui.generate_block_text_obj(GFONTS, board_1.prev_board[row][col])
@@ -228,7 +242,7 @@ while True:
                     block_rect = (col*F.tile_size+F.board_origin_1[0]+F.board_frame_px, 
                         row*F.tile_size+F.board_origin_1[1]+F.board_frame_px, 
                         F.tile_size-F.board_frame_px*2,F.tile_size-F.board_frame_px*2)
-                    tile_color = F.tile_color[board_1.board[row][col]]
+                    tile_color = F.tile_color_1[board_1.board[row][col]]
                     pygame.draw.rect(DISPLAYSUR, tile_color, block_rect)
 
     # render the text
@@ -267,18 +281,12 @@ while True:
     # part 3. play sound effect
     # ===================================
 
-    sound_event_monitor = (board_0.if_moved, board_0.if_merged, board_0.if_upgraded)
+
+    sound_event_monitor = [board_0.if_moved, board_0.if_merged, board_0.if_upgraded]
+    sound_event_monitor.append(len(board_0.cancelled)>0)
     sound_player.play_sound_effect(sound_event_monitor, controller.game_status)
     board_0.resest_event_monitor()
 
-
-    # ===================================
-    # part 4. handle trophy
-    # ===================================
-
-    # trophy_name = "c"+str(status_bar.star_score)
-    # if trophy_name in trophy.trophy_dict and not trophy.trophy_dict[trophy_name]:
-    #    trophy.trigger(trophy_name)
 
     # ===================================
     # end of each frame

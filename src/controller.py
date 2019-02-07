@@ -22,12 +22,11 @@ class Controller(object):
         6: 'game_beat'
     }
 
-    def __init__(self, DISPLAYSUR, trophy):
+    def __init__(self, DISPLAYSUR):
         self.game_status = 0 
         self.DISPLAYSUR = DISPLAYSUR
         self.title_counter = 0
         self.title_color = 0
-        self.trophy = trophy
 
     def start_application(self):
         self.game_status = 1
@@ -136,8 +135,8 @@ class Controller(object):
         self.draw_pop_up_menu_bg_rect(F.red, size= F.menu_size)
 
         y_offset = 200
-        self.DISPLAYSUR.blit(text_obj_0,(F.menu_rect[0]+10, F.menu_rect[1]+y_offset+20))
-        self.DISPLAYSUR.blit(text_obj_1,(F.menu_rect[0]+10, F.menu_rect[1]+y_offset+50))
+        self.DISPLAYSUR.blit(text_obj_0,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+20))
+        self.DISPLAYSUR.blit(text_obj_1,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+50))
 
         # Game Tile
         fg_color = F.white
@@ -179,27 +178,29 @@ class Controller(object):
         text_obj_3 = FONT_s.render("Press <R> to start over the game.", True, F.white, None)
         text_obj_4 = FONT_s.render("To play: ", True, F.white, None)
         text_obj_4a = FONT_s.render("   Arrow Key / W,A,S,D / H,J,K,L to move ", True, F.white, None)
-        text_obj_4b = FONT_s.render("   Upgrade the castle in the middle to win ", True, F.white, None)
+        text_obj_4b = FONT_s.render("   * LEFT board: merge two blocks of opposite signs,  ", True, F.white, None)
+        text_obj_4c = FONT_s.render("      with same values to cancel them and move them  ", True, F.white, None)
+        text_obj_4d = FONT_s.render("      to the RIGHT board.  ", True, F.white, None)
+        text_obj_4e = FONT_s.render("   * RIGHT board: play like a normal 2048 game.  ", True, F.white, None)
+        text_obj_4f = FONT_s.render("      creat a 2048 tile on RIGHT to win.  ", True, F.white, None)
 
-        self.draw_pop_up_menu_bg_rect(F.green, size= F.menu_size)
+        self.draw_pop_up_menu_bg_rect(F.green, size= F.menu_size+10)
 
         y_offset = 90
-        self.DISPLAYSUR.blit(text_obj_0,(F.menu_rect[0]+20, F.menu_rect[1]+y_offset+20))
-        self.DISPLAYSUR.blit(text_obj_1,(F.menu_rect[0]+20, F.menu_rect[1]+y_offset+20))
-        self.DISPLAYSUR.blit(text_obj_2,(F.menu_rect[0]+20, F.menu_rect[1]+y_offset+40))
-        self.DISPLAYSUR.blit(text_obj_3,(F.menu_rect[0]+20, F.menu_rect[1]+y_offset+60))
-        self.DISPLAYSUR.blit(text_obj_4,(F.menu_rect[0]+20, F.menu_rect[1]+y_offset+90))
-        self.DISPLAYSUR.blit(text_obj_4a,(F.menu_rect[0]+20, F.menu_rect[1]+y_offset+110))
-        self.DISPLAYSUR.blit(text_obj_4b,(F.menu_rect[0]+20, F.menu_rect[1]+y_offset+130))
+        self.DISPLAYSUR.blit(text_obj_0,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+20))
+        self.DISPLAYSUR.blit(text_obj_1,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+20))
+        self.DISPLAYSUR.blit(text_obj_2,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+40))
+        self.DISPLAYSUR.blit(text_obj_3,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+60))
+        self.DISPLAYSUR.blit(text_obj_4,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+110))
+        self.DISPLAYSUR.blit(text_obj_4a,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+130))
+        self.DISPLAYSUR.blit(text_obj_4b,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+150))
+        self.DISPLAYSUR.blit(text_obj_4c,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+170))
+        self.DISPLAYSUR.blit(text_obj_4d,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+190))
+        self.DISPLAYSUR.blit(text_obj_4e,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+210))
+        self.DISPLAYSUR.blit(text_obj_4f,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+230))
         GenUI.draw_text_with_outline(self.DISPLAYSUR, FONT_l, "OPTION MENU", 
             F.white, F.orange, 5, (F.center_x, F.center_y-170) , if8=True, if_center=True)
         
-        # draw the trophies
-        # text_obj_5 = FONT_s.render("Achievements", True, F.white, None)
-        # self.DISPLAYSUR.blit(text_obj_5,(F.menu_rect[0]+20, F.menu_rect[1]+y_offset+165)) 
-        # trophy_pos = (F.menu_rect[0]+40, F.menu_rect[1]+y_offset+185, 300, 100)
-        # self.trophy.draw_trophy(self.DISPLAYSUR, trophy_pos)
-
         pygame.display.update()
 
 
@@ -231,17 +232,18 @@ class Controller(object):
             text_obj_0 = INvFONT.render("MILESTONE [%d] REACHED" % milestone,
                 True, F.white, None)
             text_obj_1 = GFONT.render("Press <ENTER> to continue.", True, 
-                F.white, F.black) 
+                F.white, F.black)
             text_obj_2 = GFONT.render("", True, F.white, F.black) 
         
         #pygame.draw.rect(self.DISPLAYSUR, F.blue, F.menu_rect)
-        self.draw_pop_up_menu_bg_rect(F.blue2, size= None)
+        self.draw_pop_up_menu_bg_rect(F.blue2, size= F.menu_size+20)
 
         y_offset = 150
-        self.DISPLAYSUR.blit(text_obj_0,(F.menu_rect[0]+20, F.menu_rect[1]+y_offset+20))
-        self.DISPLAYSUR.blit(text_obj_1,(F.menu_rect[0]+20, F.menu_rect[1]+y_offset+60))
-        self.DISPLAYSUR.blit(text_obj_2,(F.menu_rect[0]+20, F.menu_rect[1]+y_offset+90))
-        self.DISPLAYSUR.blit(text_obj_3,(F.menu_rect[0]+20, F.menu_rect[1]+y_offset+120))
+
+        self.DISPLAYSUR.blit(text_obj_0,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+20))
+        self.DISPLAYSUR.blit(text_obj_1,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+60))
+        self.DISPLAYSUR.blit(text_obj_2,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+90))
+        self.DISPLAYSUR.blit(text_obj_3,(F.center_x-F.menu_size+20, F.center_y-F.menu_size+y_offset+120))
         GenUI.draw_text_with_outline(self.DISPLAYSUR, FONT_l, "YOU WIN", 
             F.orange, F.red, 5, (F.center_x, F.center_y-150) , if8=True, if_center=True)
         

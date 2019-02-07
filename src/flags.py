@@ -116,10 +116,9 @@ class Flags(object):
 
         if self.debug_mod:
             if self.map_rows == 3:
-                ret = 32
+                ret = 8
             if self.map_rows == 4:
-                ret = 256
-            ret = 1024
+                ret = 16
 
         return ret
 
@@ -170,6 +169,24 @@ class Flags(object):
             -2048: (15,250,15),
             -4096: (10,250,10),
             -8192: ( 5,250, 5)
+        }
+
+        self.tile_color_1 = {
+            0   : self.white,
+            1   : (150,150,90),
+            2   : (220,180,45),
+            4   : (250,220, 0),
+            8   : (150,120, 0),
+            16  : (150, 90, 0),
+            32  : self.orange,
+            64 : (250, 90, 0),
+            128 : (250, 50, 0),
+            256 : self.red,
+            512: (250, 20,20),
+            1024: self.blue,
+            2048: self.blue2,
+            4096: self.grey1,
+            8192: self.grey2
         }
 
     # def __get_sound(self):

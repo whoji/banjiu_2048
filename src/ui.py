@@ -6,10 +6,11 @@ from pygame.locals import *
 class StatusBar(object):
     """docstring for StatusBar"""
     def __init__(self):
-        #self.controller = None
+        #self.controller = Nonestatus_bar
         self.board = None
         self.top_score = 0
         self.cur_score = 0
+        self.top_block = 0
         self.moves = 0
         self.pos = (0, F.window_h - F.status_bar_size)
         self.size = (F.window_w, F.status_bar_size)
@@ -21,6 +22,9 @@ class StatusBar(object):
         self.cur_score = self.get_board_total_sum(self.board.board)
         if self.cur_score > self.top_score:
             self.top_score = self.cur_score
+        self.cur_largest_block = self.get_board_max(self.board.board)
+        if self.cur_largest_block > self.top_block:
+            self.top_block = self.cur_largest_block
 
     def render(self, DISPLAYSUR):    
         #bg = pygame.image.load(F.option_bg_img_path)
@@ -48,9 +52,20 @@ class StatusBar(object):
         DISPLAYSUR.blit(tot_top_score, self.apply_offset(self.pos, (710, 10)))
         DISPLAYSUR.blit(tov_top_score, self.apply_offset(self.pos, (710, 25)))
 
+        # display the top block    
+        tot_top_block = GFONT_s.render("castle", True, F.white, None)
+        tov_top_block = GFONT_b.render(str(self.top_block), True, F.white, None)
+        DISPLAYSUR.blit(tot_top_block, self.apply_offset(self.pos, (610, 10)))
+        DISPLAYSUR.blit(tov_top_block, self.apply_offset(self.pos, (610, 25)))        
+
     @staticmethod
     def get_board_total_sum(b):
         ret = sum([sum([abs(e) for e in r]) for r in b])
+        return ret
+    
+    @staticmethod
+    def get_board_max(b):
+        ret = max([max(r) for r in b])
         return ret
 
     @staticmethod

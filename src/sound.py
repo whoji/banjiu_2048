@@ -39,7 +39,10 @@ class SoundPlayer(object):
                 self.is_playing = True 
             return
         else:
-            if event[2]:
+            if event[2]: # upgrade
+                self.sounds['castle'].play()
+                return
+            if event[3]: # cancelled_list is not empty 
                 self.sounds['castle'].play()
                 return
             #elif event[1]:
