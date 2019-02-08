@@ -9,7 +9,7 @@ class Flags(object):
         # game general
         self.game_name = 'Banjiu 2048'
         self.game_ver = '0.2.apha.190206'
-        self.proj_path = '/home/whoji/Desktop/ILC_2019/bw2048/'
+        self.proj_path = './'
         self.save_path = './save/'
         self.debug_mod = False
         self.game_fps = 60
