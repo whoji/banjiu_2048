@@ -1,4 +1,3 @@
-#https://medium.com/@yvanscher/how-to-make-a-game-with-pygame-fc85159ae354
 import pygame
 import sys
 import random
